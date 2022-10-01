@@ -18,27 +18,38 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
 
     let locationManager = CLLocationManager()
     var location: CLLocation?
+    var updatingLocation = false
+    var lastLocationError: Error?
+
+    let geocoder = CLGeocoder()
+    var placemark: CLPlacemark?
+    var performingReverseGeocoding = false
+    var lastGeocodingError: Error?
 
     // region Actions
     @IBAction func getLocation() {
-        // 通过delegate调用获取位置方法
+        if updatingLocation {
+            // 如果正在获取位置，说明点击了 "停止"
+            stopLocationManager()
+        } else {
+            // 通过delegate调用获取位置方法
 
-        // 获取权限
-        let authStatus = locationManager.authorizationStatus
-        if authStatus == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
-            return
+            // 获取权限
+            let authStatus = locationManager.authorizationStatus
+            if authStatus == .notDetermined {
+                locationManager.requestWhenInUseAuthorization()
+                return
+            }
+
+            if authStatus == .denied || authStatus == .restricted {
+                // 当位置权限被禁用时，调用showLocationServicesDeniedAlert方法
+                showLocationServicesDeniedAlert()
+                return
+            }
+
+            startLocationManager()
         }
-
-        if authStatus == .denied || authStatus == .restricted {
-            // 当位置权限被禁用时，调用showLocationServicesDeniedAlert方法
-            showLocationServicesDeniedAlert()
-            return
-        }
-
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        locationManager.startUpdatingLocation()
+        updateLabels()
     }
     // endregion
 
@@ -47,12 +58,57 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     // CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let newLocation = locations.last!
-        location = newLocation
-        updateLabels()
+
+        // 让定位服务请求不那么快
+        if newLocation.timestamp.timeIntervalSinceNow < -5 {
+            return
+        }
+
+        // 过滤掉无效数据
+        if newLocation.horizontalAccuracy < 0 {
+            return
+        }
+
+        // 如果更精确了，就更新location
+        if location == nil || location!.horizontalAccuracy > newLocation.horizontalAccuracy{
+            location = newLocation
+            lastLocationError = nil
+
+            if newLocation.horizontalAccuracy <= locationManager.desiredAccuracy {
+                // 如果精度足够了，就让定位服务停下来
+                stopLocationManager()
+            }
+            updateLabels()
+
+            // 经纬度转地址
+            if !performingReverseGeocoding {
+                print("*** 开始转换经纬度 ***")
+                performingReverseGeocoding = true
+
+                geocoder.reverseGeocodeLocation(newLocation) { placemark, error in
+                    self.lastLocationError = error
+                    if error == nil, let places = placemark, !places.isEmpty {
+                        self.placemark = places.last!
+                    } else {
+                        self.placemark = nil
+                    }
+                    self.performingReverseGeocoding = false
+                    self.updateLabels()
+                }
+            }
+        }
+
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("didFailWithError \(error.localizedDescription)")
+        if (error as NSError).code == CLError.locationUnknown.rawValue {
+            // 如果Core Location还在尝试
+            return
+        }
+        lastLocationError = error
+        stopLocationManager()
+        updateLabels()
     }
 
     // endregion
@@ -79,13 +135,90 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
             longitudeLabel.text = String(format: "%.8f", location.coordinate.longitude)
             tagButton.isHidden = false
             messageLabel.text = ""
+
+            // 解析地址
+            if let placemark = placemark {
+                addressLabel.text = string(from: placemark)
+            } else if performingReverseGeocoding {
+                addressLabel.text = "定位中..."
+            } else if lastGeocodingError != nil {
+                addressLabel.text = "定位错误"
+            } else {
+                addressLabel.text = "无效地址"
+            }
         } else {
             latitudeLabel.text = ""
             longitudeLabel.text = ""
             addressLabel.text = ""
             tagButton.isHidden = true
-            messageLabel.text = "请点击[获取我的位置]"
+//            messageLabel.text = "请点击[获取我的位置]"
+            let statusMessage: String
+            if let error = lastLocationError as NSError? {
+                if error.domain == kCLErrorDomain && error.code == CLError.denied.rawValue {
+                    statusMessage = "定位服务被禁用"
+                } else {
+                    statusMessage = "定位时发生错误"
+                }
+            } else if !CLLocationManager.locationServicesEnabled() {
+                statusMessage = "定位服务被禁用"
+            } else if updatingLocation {
+                statusMessage = "定位中..."
+            } else {
+                statusMessage = "请点击[获取我的位置]"
+            }
+            messageLabel.text = statusMessage
         }
+        configureGetButton()
+    }
+
+    func stopLocationManager() {
+        if updatingLocation {
+            locationManager.stopUpdatingLocation()
+            locationManager.delegate = nil
+            updatingLocation = false
+        }
+    }
+
+    func startLocationManager() {
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            // 10m的目标精确度
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+            updatingLocation = true
+        }
+    }
+
+    func configureGetButton() {
+        if updatingLocation {
+            getButton.setTitle("停止", for: .normal)
+        } else {
+            getButton.setTitle("获取我的位置", for: .normal)
+        }
+    }
+
+    func string(from placemark: CLPlacemark) -> String {
+        var line1 = ""
+        if let tmp = placemark.subThoroughfare {
+            line1 += tmp + " "
+        }
+        if let tmp = placemark.thoroughfare {
+            line1 += tmp
+        }
+
+        var line2 = ""
+        if let tmp = placemark.locality {
+            line2 += tmp + " "
+        }
+        if let tmp = placemark.administrativeArea {
+            line2 += tmp + " "
+        }
+        if let tmp = placemark.postalCode {
+            line2 += tmp
+        }
+        print(line1)
+        print(line2)
+        return line1 + "\n" + line2
     }
 
     // endregion

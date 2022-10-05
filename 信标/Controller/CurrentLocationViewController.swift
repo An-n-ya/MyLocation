@@ -113,10 +113,35 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
 
     // endregion
 
+    // region overrides
+
     override func viewDidLoad() {
         super.viewDidLoad()
         updateLabels()
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isNavigationBarHidden = true
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.isNavigationBarHidden = false
+    }
+
+    // endregion
+
+
+    // region Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "TagLocation" {
+            let controller = segue.destination as! LocationDetailsViewController
+            controller.coordinate = location!.coordinate
+            controller.placemark = placemark
+        }
+    }
+    // endregion
 
     // region helper
     func showLocationServicesDeniedAlert() {

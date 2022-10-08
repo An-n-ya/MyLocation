@@ -15,6 +15,7 @@ private let dateFormatter: DateFormatter = {
     return formatter
 }()
 
+
 class LocationDetailsViewController: UITableViewController {
     @IBOutlet var descriptionTextView: UITextView!
     @IBOutlet var categoryLabel: UILabel!
@@ -49,6 +50,20 @@ class LocationDetailsViewController: UITableViewController {
     // endregion
 
     // region overrides
+    @objc func hideKeyboard(_ gestureRecognizer: UIGestureRecognizer) {
+        let point = gestureRecognizer.location(in: tableView)
+        // 获取当前触摸点对应的indexPath
+        let indexPath = tableView.indexPathForRow(at: point)
+
+        if indexPath != nil && indexPath!.section == 0 && indexPath!.row == 0 {
+            // 如果已经在输入框内， 就什么都不做
+            return
+        }
+
+        // 取消聚焦
+        descriptionTextView.resignFirstResponder()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         descriptionTextView.text = ""
@@ -64,6 +79,13 @@ class LocationDetailsViewController: UITableViewController {
         }
 
         dateLabel.text = format(date: Date())
+
+        // 隐藏键盘的条件
+        let gestureRecognizer = UITapGestureRecognizer(
+                target: self, action: #selector(hideKeyboard))
+        gestureRecognizer.cancelsTouchesInView = false
+        tableView.addGestureRecognizer(gestureRecognizer)
+
     }
 
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
@@ -71,7 +93,7 @@ class LocationDetailsViewController: UITableViewController {
             // 只有前两个section包含可编辑的项目
             return indexPath
         } else {
-            nil
+            return nil
         }
     }
 

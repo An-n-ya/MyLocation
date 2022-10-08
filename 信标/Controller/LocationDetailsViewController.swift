@@ -66,6 +66,22 @@ class LocationDetailsViewController: UITableViewController {
         dateLabel.text = format(date: Date())
     }
 
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if indexPath.section == 0 || indexPath.section == 1 {
+            // 只有前两个section包含可编辑的项目
+            return indexPath
+        } else {
+            nil
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 0 && indexPath.row == 0 {
+            // 增大输入框的聚焦范围
+            descriptionTextView.becomeFirstResponder()
+        }
+    }
+
     // endregion
 
     // region helper

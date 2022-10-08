@@ -32,7 +32,15 @@ class LocationDetailsViewController: UITableViewController {
     // region Actions
 
     @IBAction func done() {
-        navigationController?.popViewController(animated: true)
+        // 完成时展示HUD动画
+        guard let mainView = navigationController?.parent?.view else {return}
+        let hudView = HudView.hud(inView: mainView, animated: true)
+        hudView.text = "已标记"
+
+        afterDelay(0.6) {
+            hudView.hide()
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 
     @IBAction func cancel() {

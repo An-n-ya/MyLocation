@@ -44,17 +44,16 @@ class LocationDetailsViewController: UITableViewController {
         let hudView = HudView.hud(inView: mainView, animated: true)
         hudView.text = "已标记"
 
-        print("context is \(managedObjectContext)")
-        // core data 的实例
-        let location = Location(context: managedObjectContext)
-        location.locationDescription = descriptionTextView.text
-        location.category = categoryName
-        location.latitude = coordinate.latitude
-        location.longitude = coordinate.longitude
-        location.date = date
-        location.placemark = placemark
-
         do {
+        // core data 的实例
+            let location = try Location(context: managedObjectContext)
+            location.locationDescription = descriptionTextView.text
+            location.category = categoryName
+            location.latitude = coordinate.latitude
+            location.longitude = coordinate.longitude
+            location.date = date
+            location.placemark = placemark
+
             try managedObjectContext.save()
             afterDelay(0.6) {
                 hudView.hide()
@@ -62,7 +61,8 @@ class LocationDetailsViewController: UITableViewController {
             }
 
         } catch {
-            fatalError("save tag location failed: \(error)")
+            // 把错误信息发送给NotificationCenter
+            fatalCoreDataError(error)
         }
 
 

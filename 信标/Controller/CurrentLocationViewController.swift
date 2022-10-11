@@ -145,7 +145,6 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
             controller.placemark = placemark
             // 把core data context传递过去
             controller.managedObjectContext = managedObjectContext
-            print("Current也传过去啦！")
         }
     }
     // endregion

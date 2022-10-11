@@ -73,16 +73,40 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func saveContext () {
-            let context = persistentContainer.viewContext
-            if context.hasChanges {
-                do {
-                    try context.save()
-                } catch {
-                    let nsError = error as NSError
-                    fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-                }
+        let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nsError = error as NSError
+                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
+    }
+
+    func listenForFatalCoreDataNotifications() {
+        NotificationCenter.default.addObserver(
+                forName: dataSaveFailedNotification,
+                object: nil,
+                queue: OperationQueue.main) { _ in
+            let message = """
+                          很抱歉！在保存数据时,MyLocation内部发生错误
+                          点击 好 关闭此应用
+                          """
+            let alert = UIAlertController(title: "Internal Error", message: message, preferredStyle: .alert)
+            let action = UIAlertAction(title: "OK", style: .default) {_ in
+                let exception = NSException(
+                        name: NSExceptionName.internalInconsistencyException,
+                        reason: "Fatal Core Data Error",
+                        userInfo: nil)
+                exception.raise()
+            }
+            alert.addAction(action)
+
+            let tabController = self.window!.rootViewController!
+            tabController.present(alert, animated: true, completion: nil)
+        }
+    }
 
 }
 

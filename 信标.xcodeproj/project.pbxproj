@@ -17,6 +17,9 @@
 		4A40DBB828E5948C005587F3 /* CurrentLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A40DBB728E5948C005587F3 /* CurrentLocationViewController.swift */; };
 		4A40DBBD28E5948F005587F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A40DBBC28E5948F005587F3 /* Assets.xcassets */; };
 		4A5D131128ED1C0B001F2C87 /* LocationDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5D131028ED1C0B001F2C87 /* LocationDetailsViewController.swift */; };
+		4AFD4BC028F3CDAA00C7FAE8 /* MyLocation.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4AFD4BBE28F3CDAA00C7FAE8 /* MyLocation.xcdatamodeld */; };
+		4AFD4BC428F3D6EE00C7FAE8 /* Location+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFD4BC228F3D6EE00C7FAE8 /* Location+CoreDataClass.swift */; };
+		4AFD4BC528F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFD4BC328F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +35,9 @@
 		4A40DBBC28E5948F005587F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A40DBC128E5948F005587F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A5D131028ED1C0B001F2C87 /* LocationDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDetailsViewController.swift; sourceTree = "<group>"; };
+		4AFD4BBF28F3CDAA00C7FAE8 /* MyLocation.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MyLocation.xcdatamodel; sourceTree = "<group>"; };
+		4AFD4BC228F3D6EE00C7FAE8 /* Location+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Location+CoreDataClass.swift"; sourceTree = "<group>"; };
+		4AFD4BC328F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Location+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +97,7 @@
 		4A40DBB228E5948C005587F3 /* 信标 */ = {
 			isa = PBXGroup;
 			children = (
+				4AFD4BC128F3CDB100C7FAE8 /* CoreData */,
 				4A40DBC828E5959C005587F3 /* Resources */,
 				4A40DBC728E59584005587F3 /* Controller */,
 				4A40DBC128E5948F005587F3 /* Info.plist */,
@@ -117,6 +124,16 @@
 				4A40DBBC28E5948F005587F3 /* Assets.xcassets */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		4AFD4BC128F3CDB100C7FAE8 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				4AFD4BC228F3D6EE00C7FAE8 /* Location+CoreDataClass.swift */,
+				4AFD4BC328F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift */,
+				4AFD4BBE28F3CDAA00C7FAE8 /* MyLocation.xcdatamodeld */,
+			);
+			path = CoreData;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -194,8 +211,11 @@
 				4A40DBB828E5948C005587F3 /* CurrentLocationViewController.swift in Sources */,
 				43AD5BA2A11EE0B0F59D7B40 /* CategoryPickerViewController.swift in Sources */,
 				43AD542DA3FA38F024DDEDAC /* AppDelegate.swift in Sources */,
+				4AFD4BC528F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift in Sources */,
 				43AD5CACB30BB890632D9DB9 /* SceneDelegate.swift in Sources */,
 				43AD5CE680F9255EAA49C2AE /* HudView.swift in Sources */,
+				4AFD4BC428F3D6EE00C7FAE8 /* Location+CoreDataClass.swift in Sources */,
+				4AFD4BC028F3CDAA00C7FAE8 /* MyLocation.xcdatamodeld in Sources */,
 				43AD59C2DC7AABF6E13A3AFE /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -401,6 +421,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		4AFD4BBE28F3CDAA00C7FAE8 /* MyLocation.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				4AFD4BBF28F3CDAA00C7FAE8 /* MyLocation.xcdatamodel */,
+			);
+			currentVersion = 4AFD4BBF28F3CDAA00C7FAE8 /* MyLocation.xcdatamodel */;
+			path = MyLocation.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 4A40DBA828E5948C005587F3 /* Project object */;
 }

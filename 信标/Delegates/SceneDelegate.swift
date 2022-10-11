@@ -6,17 +6,41 @@
 //
 
 import UIKit
+import CoreData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+    
     var window: UIWindow?
+    
+    lazy var persistentContainer: NSPersistentContainer = {
+        // 这里的 MyLocation 与 MyLocation.xcdatamodeld 文件对应
+        let container = NSPersistentContainer(name: "MyLocation")
+        container.loadPersistentStores {_, error in
+            if let error = error {
+                fatalError("不能从CoreData读取数据 \(error)")
+            }
+        }
+        print("coreData container 已创建！！！\(container.name)")
+        return container
+    }()
+    
+    lazy var managedObjectContext = persistentContainer.viewContext
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        let tabController = window!.rootViewController as! UITabBarController
+        if let tabViewControllers = tabController.viewControllers {
+            // 取第一个选项卡里的CurrentLocationViewController
+            let navController = tabViewControllers[0] as! UINavigationController
+            let controller = navController.viewControllers.first as! CurrentLocationViewController
+            // 把core data context传递过去
+            controller.managedObjectContext = managedObjectContext
+//            print("coreData managedObjectContext 已创建！！！\(container.viewContext)")
+//            print("传过去啦！值为 \(managedObjectContext.name)")
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -45,8 +69,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        saveContext()
     }
 
+    func saveContext () {
+            let context = persistentContainer.viewContext
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    let nsError = error as NSError
+                    fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                }
+            }
+        }
 
 }
 

@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreLocation
+import CoreData
 
 class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var messageLabel: UILabel!
@@ -25,6 +26,9 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     var placemark: CLPlacemark?
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
+
+    // core data context
+    var managedObjectContext: NSManagedObjectContext!
 
     // region Actions
     @IBAction func getLocation() {
@@ -139,6 +143,9 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
             let controller = segue.destination as! LocationDetailsViewController
             controller.coordinate = location!.coordinate
             controller.placemark = placemark
+            // 把core data context传递过去
+            controller.managedObjectContext = managedObjectContext
+            print("Current也传过去啦！")
         }
     }
     // endregion

@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 fatalError("不能从CoreData读取数据 \(error)")
             }
         }
-        print("coreData container 已创建！！！\(container.name)")
+//        print("coreData container 已创建！！！\(container.name)")
         return container
     }()
     
@@ -34,12 +34,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabController = window!.rootViewController as! UITabBarController
         if let tabViewControllers = tabController.viewControllers {
             // 取第一个选项卡里的CurrentLocationViewController
-            let navController = tabViewControllers[0] as! UINavigationController
+            var navController = tabViewControllers[0] as! UINavigationController
             let controller = navController.viewControllers.first as! CurrentLocationViewController
             // 把core data context传递过去
             controller.managedObjectContext = managedObjectContext
-//            print("coreData managedObjectContext 已创建！！！\(container.viewContext)")
-//            print("传过去啦！值为 \(managedObjectContext.name)")
+
+            // 取第二个选项卡里的UINavigationController
+            navController = tabViewControllers[1] as! UINavigationController
+            let controller2 = navController.viewControllers.first as! LocationsViewController
+            // 把core data context传递过去
+            controller2.managedObjectContext = managedObjectContext
         }
     }
 

@@ -14,6 +14,8 @@
 		43AD5BA2A11EE0B0F59D7B40 /* CategoryPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43AD55BCA1427080B3B476C2 /* CategoryPickerViewController.swift */; };
 		43AD5CACB30BB890632D9DB9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43AD5D139B6E8EE0875DF06C /* SceneDelegate.swift */; };
 		43AD5CE680F9255EAA49C2AE /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43AD54F45766C0F3677FF05F /* HudView.swift */; };
+		4A0C7BC228F7C1B800583589 /* LocationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0C7BC128F7C1B800583589 /* LocationsViewController.swift */; };
+		4A0C7BC428F7F51600583589 /* LocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0C7BC328F7F51600583589 /* LocationCell.swift */; };
 		4A40DBB828E5948C005587F3 /* CurrentLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A40DBB728E5948C005587F3 /* CurrentLocationViewController.swift */; };
 		4A40DBBD28E5948F005587F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A40DBBC28E5948F005587F3 /* Assets.xcassets */; };
 		4A5D131128ED1C0B001F2C87 /* LocationDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5D131028ED1C0B001F2C87 /* LocationDetailsViewController.swift */; };
@@ -30,6 +32,8 @@
 		43AD5B3D16531DC75D134ED3 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		43AD5D139B6E8EE0875DF06C /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		43AD5E0ED5D7429358DDA492 /* Functions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		4A0C7BC128F7C1B800583589 /* LocationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsViewController.swift; sourceTree = "<group>"; };
+		4A0C7BC328F7F51600583589 /* LocationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCell.swift; sourceTree = "<group>"; };
 		4A40DBB028E5948C005587F3 /* 信标.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "信标.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A40DBB728E5948C005587F3 /* CurrentLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentLocationViewController.swift; sourceTree = "<group>"; };
 		4A40DBBC28E5948F005587F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -74,6 +78,7 @@
 			children = (
 				43AD54F45766C0F3677FF05F /* HudView.swift */,
 				43AD5E0ED5D7429358DDA492 /* Functions.swift */,
+				4A0C7BC328F7F51600583589 /* LocationCell.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -114,6 +119,7 @@
 				4A40DBB728E5948C005587F3 /* CurrentLocationViewController.swift */,
 				4A5D131028ED1C0B001F2C87 /* LocationDetailsViewController.swift */,
 				43AD55BCA1427080B3B476C2 /* CategoryPickerViewController.swift */,
+				4A0C7BC128F7C1B800583589 /* LocationsViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -211,7 +217,9 @@
 				4A40DBB828E5948C005587F3 /* CurrentLocationViewController.swift in Sources */,
 				43AD5BA2A11EE0B0F59D7B40 /* CategoryPickerViewController.swift in Sources */,
 				43AD542DA3FA38F024DDEDAC /* AppDelegate.swift in Sources */,
+				4A0C7BC228F7C1B800583589 /* LocationsViewController.swift in Sources */,
 				4AFD4BC528F3D6EE00C7FAE8 /* Location+CoreDataProperties.swift in Sources */,
+				4A0C7BC428F7F51600583589 /* LocationCell.swift in Sources */,
 				43AD5CACB30BB890632D9DB9 /* SceneDelegate.swift in Sources */,
 				43AD5CE680F9255EAA49C2AE /* HudView.swift in Sources */,
 				4AFD4BC428F3D6EE00C7FAE8 /* Location+CoreDataClass.swift in Sources */,

@@ -31,6 +31,19 @@ class LocationDetailsViewController: UITableViewController {
     // 默认值
     var categoryName = "无标签"
     var date = Date()
+    var descriptionText = ""
+    var locationToEdit: Location? {
+        didSet {
+            if let location = locationToEdit {
+                descriptionText = location.locationDescription
+                categoryName = location.category
+                date = location.date
+                coordinate = CLLocationCoordinate2DMake(location.latitude, location.longitude)
+                placemark = location.placemark
+            }
+        }
+    }
+
 
     // core data context
     var managedObjectContext: NSManagedObjectContext!
@@ -42,11 +55,18 @@ class LocationDetailsViewController: UITableViewController {
         // 完成时展示HUD动画
         guard let mainView = navigationController?.parent?.view else {return}
         let hudView = HudView.hud(inView: mainView, animated: true)
-        hudView.text = "已标记"
+
+        let location: Location
+        if let tmp = locationToEdit {
+            hudView.text = "已更新"
+            location = tmp
+        } else {
+            hudView.text = "已标记"
+            location = Location(context: managedObjectContext)
+        }
 
         do {
         // core data 的实例
-            let location = try Location(context: managedObjectContext)
             location.locationDescription = descriptionTextView.text
             location.category = categoryName
             location.latitude = coordinate.latitude
@@ -99,7 +119,11 @@ class LocationDetailsViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        descriptionTextView.text = ""
+        if let location = locationToEdit {
+            // 如果locationToEdit有值，说明是修改cell
+            title = "编辑位置"
+        }
+        descriptionTextView.text = descriptionText
         dateLabel.text = format(date: date)
         categoryLabel.text = categoryName
 

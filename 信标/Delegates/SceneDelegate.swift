@@ -44,6 +44,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let controller2 = navController.viewControllers.first as! LocationsViewController
             // 把core data context传递过去
             controller2.managedObjectContext = managedObjectContext
+
+            // 取第三个选项卡里的MapViewController
+            navController = tabViewControllers[2] as! UINavigationController
+            let controller3 = navController.viewControllers.first as! MapViewController
+            controller3.managedObjectContext = managedObjectContext
         }
     }
 

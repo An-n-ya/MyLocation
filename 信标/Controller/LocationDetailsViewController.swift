@@ -159,7 +159,14 @@ class LocationDetailsViewController: UITableViewController {
         if indexPath.section == 0 && indexPath.row == 0 {
             // 增大输入框的聚焦范围
             descriptionTextView.becomeFirstResponder()
+        } else if (indexPath.section == 1 && indexPath.row == 0) {
+            // 添加照片
+//            takePhotoWithCamera()
+//            choosePhotoFromLibrary()
+            pickPhoto()
+            tableView.deselectRow(at: indexPath, animated: true)
         }
+
     }
 
     // endregion
@@ -205,4 +212,67 @@ class LocationDetailsViewController: UITableViewController {
 
     // endregion
 
+}
+
+extension LocationDetailsViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    // region 帮助函数
+
+    func pickPhoto() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            // 如果相机可用
+            // 弹出选择框让用户选择
+            showPhotoMenu()
+        } else {
+            // 如果不可用，就从相册寻找
+            choosePhotoFromLibrary()
+        }
+    }
+
+    func showPhotoMenu() {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        let actCancel = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        let actPhoto = UIAlertAction(title: "拍摄照片", style: .default) {_ in
+            self.takePhotoWithCamera()
+        }
+        let actLibrary = UIAlertAction(title: "从相册中选择", style: .default) {_ in
+            self.choosePhotoFromLibrary()
+        }
+
+        alert.addAction(actCancel)
+        alert.addAction(actPhoto)
+        alert.addAction(actLibrary)
+
+        present(alert, animated: true, completion: nil)
+    }
+
+    func takePhotoWithCamera() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.sourceType = .camera
+        imagePicker.delegate = self
+        imagePicker.allowsEditing = true
+        present(imagePicker, animated: true, completion: nil)
+    }
+
+    func choosePhotoFromLibrary() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.delegate = self
+        imagePicker.allowsEditing = true
+        present(imagePicker, animated: true, completion: nil)
+
+    }
+
+
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        dismiss(animated: true, completion: nil)
+    }
+
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+
+
+    // endregion
 }

@@ -24,9 +24,17 @@ class LocationDetailsViewController: UITableViewController {
     @IBOutlet var longitudeLabel: UILabel!
     @IBOutlet var addressLabel: UILabel!
     @IBOutlet var dateLabel: UILabel!
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var addPhotoLabel: UILabel!
+
+    // constraint也可以有IBOutlet
+    @IBOutlet var imageHeight: NSLayoutConstraint!
 
     var coordinate = CLLocationCoordinate2D(latitude: 0, longitude: 0)
     var placemark: CLPlacemark?
+    var image: UIImage?
+    // 后台模式监听器
+    var observer: Any!
 
     // 默认值
     var categoryName = "无标签"
@@ -48,6 +56,12 @@ class LocationDetailsViewController: UITableViewController {
     // core data context
     var managedObjectContext: NSManagedObjectContext!
 
+    deinit {
+        print("*** deinit \(self)")
+        // 取消监听
+        NotificationCenter.default.removeObserver(observer!)
+    }
+
 
     // region Actions
 
@@ -63,6 +77,8 @@ class LocationDetailsViewController: UITableViewController {
         } else {
             hudView.text = "已标记"
             location = Location(context: managedObjectContext)
+            // 如果是新增，需要将默认的photoID设置为nil
+            location.photoID = nil
         }
 
         do {
@@ -83,6 +99,22 @@ class LocationDetailsViewController: UITableViewController {
         } catch {
             // 把错误信息发送给NotificationCenter
             fatalCoreDataError(error)
+        }
+
+        // 保存图片
+        if let image = image {
+            if !location.hasPhoto {
+                // 如果原来的location对象没有photo，说明是新增，产生ID并赋值
+                location.photoID = Location.nextPhotoID() as NSNumber
+            }
+            if let data = image.jpegData(compressionQuality: 0.5) {
+                do {
+                    try data.write(to: location.photoURL, options: .atomic)
+                } catch {
+                    print("保存照片时出错：\(error)")
+                }
+            }
+
         }
 
 
@@ -119,9 +151,14 @@ class LocationDetailsViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // 注册后台监听方法
+        listenForBackgroundNotification()
         if let location = locationToEdit {
             // 如果locationToEdit有值，说明是修改cell
             title = "编辑位置"
+            if let theImage = location.photoImage {
+                show(image: theImage)
+            }
         }
         descriptionTextView.text = descriptionText
         dateLabel.text = format(date: date)
@@ -212,6 +249,27 @@ class LocationDetailsViewController: UITableViewController {
 
     // endregion
 
+    // region 处理后台模式（让页面归位）
+
+    func listenForBackgroundNotification() {
+        observer = NotificationCenter.default.addObserver(forName: UIScene.didEnterBackgroundNotification,
+            object: nil,
+            queue: OperationQueue.main) {[weak self]_ in
+            // 使用弱引用的方式使用闭包
+            if let weakSelf = self {
+                if weakSelf.presentedViewController != nil {
+                    // 如果action sheet正在展示，就取消展示
+                    weakSelf.dismiss(animated: false, completion: nil)
+                }
+                // 输入框取消焦点
+                weakSelf.descriptionTextView.resignFirstResponder()
+
+            }
+            }
+    }
+
+    // endregion
+
 }
 
 extension LocationDetailsViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -266,11 +324,29 @@ extension LocationDetailsViewController: UIImagePickerControllerDelegate, UINavi
 
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        // info是个字典，用来存放imagePickerController传过来的照片
+        image = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
+        if let theImage = image {
+            // 如果有照片，就显示出来
+            show(image: theImage)
+        }
         dismiss(animated: true, completion: nil)
     }
 
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
+    }
+
+
+    func show(image: UIImage) {
+        imageView.image = image
+        // 让图片可见
+        imageView.isHidden = false
+        addPhotoLabel.text = ""
+
+        // 让图片栏高度变化
+        imageHeight.constant = 260
+        tableView.reloadData()
     }
 
 

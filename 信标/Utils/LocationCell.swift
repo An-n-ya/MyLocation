@@ -10,6 +10,7 @@ import UIKit
 class LocationCell: UITableViewCell {
     @IBOutlet var descriptionLabel: UILabel!
     @IBOutlet var addressLabel: UILabel!
+    @IBOutlet var photoImageView: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -22,7 +23,20 @@ class LocationCell: UITableViewCell {
         // Configure the view for the selected state
     }
 
+    // 缩略图
+    func thumbnail(for location: Location) -> UIImage {
+        if location.hasPhoto, let image = location.photoImage {
+            // 如果有照片，把照片unwrap出来
+            // 调整大小
+            return image.resized(withBounds: CGSize(width: 52, height: 52))
+        }
+        // 否则返回空image
+        return UIImage()
+    }
+
     func configure(for location: Location) {
+        // 设置照片
+        photoImageView.image = thumbnail(for: location)
         if location.locationDescription.isEmpty {
             descriptionLabel.text = "(无描述)"
         } else {

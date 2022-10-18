@@ -23,6 +23,8 @@ extension Location {
     @NSManaged public var date: Date
     @NSManaged public var category: String
     @NSManaged public var placemark: CLPlacemark?
+    // 存储照片的编号
+    @NSManaged public var photoID: NSNumber?
 
 }
 

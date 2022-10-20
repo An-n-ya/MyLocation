@@ -8,14 +8,19 @@
 import UIKit
 import CoreLocation
 import CoreData
+import AudioToolbox
 
-class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate {
+class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate, CAAnimationDelegate {
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var latitudeLabel: UILabel!
     @IBOutlet weak var longitudeLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
     @IBOutlet weak var tagButton: UIButton!
     @IBOutlet weak var getButton: UIButton!
+
+    @IBOutlet weak var latitudeTextLabel: UILabel!
+    @IBOutlet weak var longitudeTextLabel: UILabel!
+    @IBOutlet weak var containerView: UIView!
 
     let locationManager = CLLocationManager()
     var location: CLLocation?
@@ -27,11 +32,32 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
 
+    var soundID: SystemSoundID = 0
+
     // core data context
     var managedObjectContext: NSManagedObjectContext!
 
+    var logoVisible = false
+
+    lazy var logoButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setBackgroundImage(
+                UIImage(named: "Logo"), for: .normal)
+        button.sizeToFit()
+        button.addTarget(
+                self, action: #selector(getLocation), for: .touchUpInside)
+        button.center.x = self.view.bounds.midX
+        button.center.y = 220
+        return button
+    }()
+
     // region Actions
     @IBAction func getLocation() {
+
+        if logoVisible {
+            hideLogoView()
+        }
+
         if updatingLocation {
             // 如果正在获取位置，说明点击了 "停止"
             stopLocationManager()
@@ -92,6 +118,10 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
                 geocoder.reverseGeocodeLocation(newLocation) { placemark, error in
                     self.lastLocationError = error
                     if error == nil, let places = placemark, !places.isEmpty {
+                        if self.placemark == nil {
+                            // 在第一次请求成功的时候播放音效
+                            self.playSoundEffect()
+                        }
                         self.placemark = places.last!
                     } else {
                         self.placemark = nil
@@ -121,6 +151,8 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // 加载音效
+        loadSoundEffect("Sound.caf")
         updateLabels()
     }
 
@@ -133,6 +165,8 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
         super.viewWillDisappear(animated)
         navigationController?.isNavigationBarHidden = false
     }
+
+
 
     // endregion
 
@@ -164,6 +198,9 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
         if let location = location {
             latitudeLabel.text = String(format: "%.8f", location.coordinate.latitude)
             longitudeLabel.text = String(format: "%.8f", location.coordinate.longitude)
+            // 隐藏标签
+            latitudeTextLabel.isHidden = false
+            longitudeTextLabel.isHidden = false
             tagButton.isHidden = false
             messageLabel.text = ""
 
@@ -181,6 +218,8 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
             latitudeLabel.text = ""
             longitudeLabel.text = ""
             addressLabel.text = ""
+            latitudeTextLabel.isHidden = true
+            longitudeTextLabel.isHidden = true
             tagButton.isHidden = true
 //            messageLabel.text = "请点击[获取我的位置]"
             let statusMessage: String
@@ -196,10 +235,73 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
                 statusMessage = "定位中..."
             } else {
                 statusMessage = "请点击[获取我的位置]"
+                showLogoView()
             }
             messageLabel.text = statusMessage
         }
         configureGetButton()
+    }
+
+    func showLogoView() {
+        if !logoVisible {
+            logoVisible = true
+            containerView.isHidden = true
+            view.addSubview(logoButton)
+        }
+    }
+
+    func hideLogoView() {
+        if !logoVisible {return}
+        logoVisible = false
+        containerView.isHidden = false
+        containerView.center.x = view.bounds.size.width * 2
+        containerView.center.y = 40 + containerView.bounds.size.height / 2
+
+        let centerX = view.bounds.midX
+
+        let panelMover = CABasicAnimation(keyPath: "position")
+        panelMover.isRemovedOnCompletion = false
+        panelMover.fillMode = CAMediaTimingFillMode.forwards
+        panelMover.duration = 0.6
+        panelMover.fromValue = NSValue(cgPoint: containerView.center)
+        panelMover.toValue = NSValue(
+                cgPoint: CGPoint(x: centerX, y: containerView.center.y))
+        panelMover.timingFunction = CAMediaTimingFunction(
+                name: CAMediaTimingFunctionName.easeOut)
+        panelMover.delegate = self
+        containerView.layer.add(panelMover, forKey: "panelMover")
+
+        let logoMover = CABasicAnimation(keyPath: "position")
+        logoMover.isRemovedOnCompletion = false
+        logoMover.fillMode = CAMediaTimingFillMode.forwards
+        logoMover.duration = 0.5
+        logoMover.fromValue = NSValue(cgPoint: logoButton.center)
+        logoMover.toValue = NSValue(
+                cgPoint: CGPoint(x: -centerX, y: logoButton.center.y))
+        logoMover.timingFunction = CAMediaTimingFunction(
+                name: CAMediaTimingFunctionName.easeIn)
+        logoButton.layer.add(logoMover, forKey: "logoMover")
+
+        let logoRotator = CABasicAnimation(
+                keyPath: "transform.rotation.z")
+        logoRotator.isRemovedOnCompletion = false
+        logoRotator.fillMode = CAMediaTimingFillMode.forwards
+        logoRotator.duration = 0.5
+        logoRotator.fromValue = 0.0
+        logoRotator.toValue = -2 * Double.pi
+        logoRotator.timingFunction = CAMediaTimingFunction(
+                name: CAMediaTimingFunctionName.easeIn)
+        logoButton.layer.add(logoRotator, forKey: "logoRotator")
+    }
+
+    // animation
+
+    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        containerView.layer.removeAllAnimations()
+        containerView.center.x = view.bounds.size.width / 2
+        containerView.center.y = 40 + containerView.bounds.size.height / 2
+        logoButton.layer.removeAllAnimations()
+        logoButton.removeFromSuperview()
     }
 
     func stopLocationManager() {
@@ -221,39 +323,65 @@ class CurrentLocationViewController: UIViewController, CLLocationManagerDelegate
     }
 
     func configureGetButton() {
+        let spinnerTag = 1000
         if updatingLocation {
             getButton.setTitle("停止", for: .normal)
+
+            if view.viewWithTag(spinnerTag) == nil {
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.center = messageLabel.center
+                spinner.center.y += spinner.bounds.size.height / 2 + 25
+                spinner.startAnimating()
+                spinner.tag = spinnerTag
+                containerView.addSubview(spinner)
+            }
         } else {
             getButton.setTitle("获取我的位置", for: .normal)
+
+            if let spinner = view.viewWithTag(spinnerTag) {
+                spinner.removeFromSuperview()
+            }
         }
     }
 
     func string(from placemark: CLPlacemark) -> String {
         var line1 = ""
-        if let tmp = placemark.subThoroughfare {
-            line1 += tmp + " "
-        }
-        if let tmp = placemark.thoroughfare {
-            line1 += tmp
-        }
+        line1.add(text: placemark.subThoroughfare)
+        line1.add(text: placemark.thoroughfare, separateBy: ", ")
+        line1.add(text: placemark.locality, separateBy: ", ")
 
         var line2 = ""
-        if let tmp = placemark.locality {
-            line2 += tmp + " "
-        }
-        if let tmp = placemark.administrativeArea {
-            line2 += tmp + " "
-        }
-        if let tmp = placemark.postalCode {
-            line2 += tmp
-        }
-        print(line1)
-        print(line2)
+        line2.add(text: placemark.administrativeArea, separateBy: " ")
+        line2.add(text: placemark.postalCode, separateBy: ", ")
+        line2.add(text: placemark.country)
         return line1 + "\n" + line2
     }
 
     // endregion
 
+
+    // region 声音效果
+
+    func loadSoundEffect(_ name: String) {
+        if let path = Bundle.main.path(forResource: name, ofType: nil) {
+            let fileURL = URL(fileURLWithPath: path, isDirectory: false)
+            let error = AudioServicesCreateSystemSoundID(fileURL as CFURL, &soundID)
+            if error != kAudioServicesNoError {
+                print("Error code \(error) loading sound: \(path)")
+            }
+        }
+    }
+
+    func unloadSoundEffect() {
+        AudioServicesDisposeSystemSoundID(soundID)
+        soundID = 0
+    }
+
+    func playSoundEffect() {
+        AudioServicesPlaySystemSound(soundID)
+    }
+
+    // endregion
 
 }
 

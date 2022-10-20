@@ -211,26 +211,14 @@ class LocationDetailsViewController: UITableViewController {
     // region helper
 
     func string(from placemark: CLPlacemark) -> String {
-        var text = ""
-        if let tmp = placemark.subThoroughfare {
-            text += tmp + " "
-        }
-        if let tmp = placemark.thoroughfare {
-            text += tmp + ", "
-        }
-        if let tmp = placemark.locality {
-            text += tmp + ", "
-        }
-        if let tmp = placemark.administrativeArea {
-            text += tmp + " "
-        }
-        if let tmp = placemark.postalCode {
-            text += tmp + ", "
-        }
-        if let tmp = placemark.country {
-            text += tmp
-        }
-        return text
+        var address = ""
+        address.add(text: placemark.subThoroughfare)
+        address.add(text: placemark.thoroughfare, separateBy: ", ")
+        address.add(text: placemark.locality, separateBy: ", ")
+        address.add(text: placemark.administrativeArea, separateBy: " ")
+        address.add(text: placemark.postalCode, separateBy: ", ")
+        address.add(text: placemark.country)
+        return address
     }
 
     func format(date: Date) -> String {

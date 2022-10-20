@@ -31,7 +31,7 @@ class LocationCell: UITableViewCell {
             return image.resized(withBounds: CGSize(width: 52, height: 52))
         }
         // 否则返回空image
-        return UIImage()
+        return UIImage(named: "No Photo")!
     }
 
     func configure(for location: Location) {
@@ -45,15 +45,9 @@ class LocationCell: UITableViewCell {
 
         if let placemark = location.placemark {
             var text = ""
-            if let tmp = placemark.subThoroughfare {
-                text += tmp + " "
-            }
-            if let tmp = placemark.thoroughfare {
-                text += tmp + ", "
-            }
-            if let tmp = placemark.locality {
-                text += tmp
-            }
+            text.add(text: placemark.subThoroughfare)
+            text.add(text: placemark.thoroughfare, separateBy: " ")
+            text.add(text: placemark.locality, separateBy: ", ")
             addressLabel.text = text
         } else {
             addressLabel.text = String(
